@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Undian Nama Acak + Hadiah</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #e0f7fa, #ffffff);
+      padding: 2rem;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      color: #00796b;
+      margin-bottom: 2rem;
+    }
+
+    label {
+      font-weight: bold;
+      margin-top: 1rem;
+      display: block;
+      color: #004d40;
+    }
+
+    textarea, input {
+      margin-top: 0.5rem;
+      width: 100%;
+      font-size: 1rem;
+      padding: 0.7rem;
+      border: 1px solid #b2dfdb;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      box-sizing: border-box;
+    }
+
+    button {
+      background: #00796b;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.8rem;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 1.5rem;
+      transition: background 0.3s ease, transform 0.3s ease;
+    }
+
+    button:hover {
+      background: #004d40;
+    }
+
+    #results {
+      margin-top: 2rem;
+      background: #ffffff;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      color: #00695c;
+    }
+
+    ul {
+      padding-left: 1.2rem;
+    }
+
+    li {
+      padding: 0.5rem 0;
+      border-bottom: 1px dashed #b2dfdb;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeInUp 0.6s ease forwards;
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .small-note {
+      font-size: 0.9rem;
+      color: #666;
+      font-style: italic;
+      margin-top: 0.5rem;
+    }
+
+    #rolling {
+      margin-top: 1rem;
+      font-weight: bold;
+      font-size: 1.2rem;
+      text-align: center;
+      color: #00796b;
+    }
+  </style>
+</head>
+<body>
+  <img src="https://drive.google.com/drive/u/0/my-drive" style="width: 100%; border-radius: 12px; margin-bottom: 1rem;">
+  <h1>🎁MILAD AL MUSLIM KE-38🎁</h1>
+
+  <label for="names">Daftar Nama Undian(pisahkan dengan koma atau baris baru):</label>
+  <textarea id="names" rows="6" placeholder="Contoh: Andi, Budi, Citra"></textarea>
+
+  <label for="prizes">Daftar Hadiah (urutan menentukan urutan pemenang):</label>
+  <textarea id="prizes" rows="4" placeholder="Contoh: Voucher 100rb, Powerbank, Pulpen Unik"></textarea>
+  <div class="small-note">Jumlah hadiah = jumlah pemenang</div>
+
+  <label for="winnerCount">Jumlah pemenang:</label>
+  <input type="number" id="winnerCount" min="1" />
+
+  <button id="drawBtn" onclick="undi()">🎲 Undi Sekarang</button>
+  <button onclick="resetUndian()">🔄 Reset</button>
+
+  <div id="rolling"></div>
+
+  <div id="results">
+    <h2>🎊 Pemenang:</h2>
+    <ul id="winners"></ul>
+    <p id="summary"></p>
+  </div>
+
+  <script>
+    function undi() {
+      const drawBtn = document.getElementById("drawBtn");
+      const rolling = document.getElementById("rolling");
+      drawBtn.disabled = true;
+      rolling.textContent = "Mengacak nama...";
+
+      const namesInput = document.getElementById("names").value;
+      let names = namesInput.split(/[\n,]+/).map(n => n.trim()).filter(n => n);
+
+      const prizeInput = document.getElementById("prizes").value;
+      let prizes = prizeInput.split(/[\n,]+/).map(p => p.trim()).filter(p => p);
+
+      const count = parseInt(document.getElementById("winnerCount").value) || prizes.length;
+
+      if (prizes.length === 0) {
+        alert("Harap masukkan daftar hadiah.");
+        return;
+      }
+
+      if (count > names.length) {
+        alert("Jumlah pemenang melebihi jumlah peserta!");
+        return;
+      }
+
+      let interval = setInterval(() => {
+        const randName = names[Math.floor(Math.random() * names.length)];
+        rolling.textContent = `Mengacak: ${randName}`;
+      }, 100);
+
+      setTimeout(() => {
+        clearInterval(interval);
+        rolling.textContent = "Pemenang ditentukan!";
+
+        let shuffled = names.sort(() => 0.5 - Math.random());
+        let selected = shuffled.slice(0, count);
+
+        names = names.filter(n => !selected.includes(n));
+        document.getElementById("names").value = names.join(", ");
+
+        const winnersList = document.getElementById("winners");
+        winnersList.innerHTML = "";
+
+        selected.forEach((name, i) => {
+          let li = document.createElement("li");
+          li.textContent = `${i + 1}. ${name}`;
+          li.style.animationDelay = `${i * 0.2}s`;
+          winnersList.appendChild(li);
+        });
+
+        document.getElementById("summary").textContent = `Total peserta tersisa: ${names.length}, Total pemenang: ${selected.length}`;
+
+        drawBtn.disabled = false;
+      }, 10000);
+    }
+
+    function resetUndian() {
+      document.getElementById("names").value = "";
+      document.getElementById("prizes").value = "";
+      document.getElementById("winnerCount").value = "";
+      document.getElementById("winners").innerHTML = "";
+      document.getElementById("rolling").textContent = "";
+      document.getElementById("summary").textContent = "";
+    }
+  </script>
+</body>
+</html>
